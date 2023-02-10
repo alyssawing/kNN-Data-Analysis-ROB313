@@ -30,7 +30,7 @@ def knn_regression(x_train, y_train, x_test, k, distance_metric):
 
 def rmse(y, y_hat):   #TODO: check what parameters are needed
     '''Find the root mean squared error (the mean of the errors of each point).'''
-    return np.sqrt(np.mean(np.square(-y + y_hat))) #TODO: change this?
+    return np.sqrt(np.mean(np.square(-y + y_hat)))
 
 def cross_validation(x, y, model=knn_regression, v=5):
     '''Estimate the optimal k for kNN regression using v-fold cross-validation.
@@ -48,30 +48,7 @@ def cross_validation(x, y, model=knn_regression, v=5):
     best_rmse = None # initialize optimal RMSE value (the lowest mean out of the 5)
 
     # For each fold, use the remaining v-1 folds to train the model and evaluate
-    # for i in range(v):
-    #     # Create the training and validation sets:
-    #     validate_points =  folds[i] # indices of the data for validation
-    #     x_val = x[validate_points] # validation data
-    #     y_val = y[validate_points] # validation targets
-    #     train_points = np.concatenate((folds[:i] + folds[i+1:])) # indices of the training points TODO
-    #     x_train = x[train_points] # training data
-    #     y_train = y[train_points] # training targets
-    #     possible_k_indices = np.arange(1,50,5) # indices of the test k's
 
-    #     # Loop over different k values and distance metrics:
-    #     for k in np.arange(1,50,5):   # try k from 1 to 50 in steps of 5
-    #         rmse_for_one_k = [] # list of RMSE losses for each fold (to average over at the end)
-    #         for distance_metric in ['l1']: # add in 'l2' later
-    #             y_hats = []
-    #             # Run kNN on each validation point and store the RMSE loss:
-    #             for x_test_pt in x_val:
-    #                 y_hats.append(model(x_train, y_train, x_test_pt, k, distance_metric))
-    #             y_hats = np.array(y_hats)
-    #             rmse_for_one_k.append(rmse(y_val, y_hats))
-    #             print(rmse_for_one_k, k)
-    #     # Average the RMSE losses over each folds:
-    #     rmses.append(np.mean(rmse_for_one_k))
-    #     print(rmses)
     possible_k_indices = np.arange(1,10,1) # indices of the test k's
     for k in possible_k_indices:  # try k from 1 to 50 in steps of 5
         rmse_for_one_k = [] # list of RMSE losses for each fold (to average over at the end)
