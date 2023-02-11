@@ -70,7 +70,7 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
             rmse_for_one_k.append(rmse(y_val, y_hats))
 
         # plot the prediction curves for each value of k:
-        plt.plot(x_val, y_hats, 'o', label='k = ' + str(k))
+        plt.plot(x_val, y_hats, 'o', markersize=3, label='k = ' + str(k))
         plt.xlabel('x values')
         plt.ylabel('Predicted y values')
         plt.title('Cross-validation prediction curves: moana_loa dataset')
@@ -140,40 +140,66 @@ def knn_classification(x_train, y_train, x_test, k, distance_metric):
     if distance_metric == 'l2': # Euclidian distance
         dist = np.sqrt(np.sum(np.square(x_train - x_test), axis=1)) # axis=1 means summing over rows TODO problem here!!
     elif distance_metric == 'l1':   # Manhattan distance
-        dist = np.sum(np.abs(x_train - x_test), axis=1) # axis=1 means summing over rows
+        dist = np.sum(np.abs(x_train - x_test), axis=1) # axis=1 means summing over rows TODO problem here!!
 
     # Use a kd tree to find nearest neighbours:
     tree = KDTree(x_train, metric='euclidean')
     dist, i_nn = tree.query(x_test, k=k) # indices (in training set) of the k nearest neighbours
+    #TODO do i need to shuffle the indices?
     y_nn = y_train[i_nn] # target values of the nearest neighbours for the query point
     y_hat = np.mean(y_nn, axis=1) # prediction for the query point is the average of the kNN targets (y_nn)
     
     return [y_hat]    # return y-prediction for the x_test point
 
-def q3_estimator(x_train, y_train, x_val, y_val, distance_metric):
+def find_accuracy(y_val, y_hats):
+    '''Find the accuracy (fraction of correct predictions) on the validation 
+    split.'''
+    correct = 0
+    for i in range(len(y_val)):
+        if y_val[i] == y_hats[i]: #TODO: should i have a small tolerance?
+            correct += 1
+    return correct / len(y_val)
+
+def q3_estimator(x_train, y_train, x_val, y_val):
     '''Estimate the best k for kNN classification and the best distance metric 
     by maximizing the accuracy (fraction of correct predictions) on the 
     validation split. Return the best k and the best distance metric.'''
     best_k, best_metric = None, None # initialize
     best_accuracy = 0 # initialize
-    pass # TODO
+    possible_k_indices = np.arange(1,50,5) # possible k values
+    possible_metrics = ['l1', 'l2'] # possible distance metrics
 
+    for k in possible_k_indices:
+        for metric in possible_metrics:
+            y_hats = knn_classification(x_train, y_train, x_val, k, metric)
+            accuracy = find_accuracy(y_val, y_hats)
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_k = k
+                best_metric = metric
+
+    return best_k, best_metric
+
+###############################################################################
+#############################   QUESTION 4  ###################################
+###############################################################################
+
+
+###############################################################################
+#############################   MAIN  ###################################
+###############################################################################
 
 if __name__ == '__main__':
 
     #===========================    Q1   ===================================#
 
     # # Load the data:
-    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mauna_loa')
-    print("Dataset being tested: mauna_loa\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mauna_loa')
+    # print("Dataset being tested: mauna_loa\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=2)
     # print("Dataset being tested: rosenbrock\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('pumadyn32nm')
     # print("Dataset being tested: pumadyn32nm\n\n")
-    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
-    # print("Dataset being tested: iris\n\n")
-    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
-    # print("Dataset being tested: mnist_small\n\n")
 
     # Estimate the optimal k for kNN regression using 5-fold cross-validation:
     # k = cross_validation(x_train, y_train)
@@ -196,13 +222,18 @@ if __name__ == '__main__':
     # plt.title('Predicted vs Actual Values')
     # plt.show()
 
-    x = np.vstack([x_train, x_val])
-    y = np.vstack([y_train, y_val])
-    # print("\nBest k found from cross validation (l1): ", cross_validation(x, y, 'l1'))
-    print("\nBest k found from cross validation (l2): ", cross_validation(x, y, 'l2'))
+    # x = np.vstack([x_train, x_val])
+    # y = np.vstack([y_train, y_val])
+    # # print("\nBest k found from cross validation (l1): ", cross_validation(x, y, 'l1'))
+    # print("\nBest k found from cross validation (l2): ", cross_validation(x, y, 'l2'))
 
 
     #===========================    Q2   ===================================#
+
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=2)
+    # print("Dataset being tested: rosenbrock\n\n")
+    # x = np.vstack([x_train, x_val])
+    # y = np.vstack([y_train, y_val])
 
     # dimensions = []
     # times = [] # time taken to run knn_regression_kd for each dimension
@@ -221,3 +252,17 @@ if __name__ == '__main__':
     # plt.ylabel('Time taken to run k-NN')
     # plt.title('Time taken to run k-NN for each dimension')
     # plt.show()
+
+    #===========================    Q3   ===================================#
+
+    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
+    print("Dataset being tested: iris\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
+    # print("Dataset being tested: mnist_small\n\n")
+
+    x = np.vstack([x_train, x_val])
+    y = np.vstack([y_train, y_val])
+
+    best_k, best_metric = q3_estimator(x, y, x_test, y_test)
+    print("Best k found: ", best_k)
+    print("Best metric found: ", best_metric)
