@@ -185,6 +185,33 @@ def q3_estimator(x_train, y_train, x_val, y_val):
 #############################   QUESTION 4  ###################################
 ###############################################################################
 
+def lin_regression(x, y, x_test, y_test):
+    '''Linear regression algorithm that minimizes the least-squares loss
+    function using singular value decomposition. x and y include both the 
+    training and validation sets.'''
+
+    # Introduce dummy feature x0 = 1:
+    x = np.insert(x, 0, 1, axis=1)
+    x_test = np.insert(x_test, 0, 1, axis=1)
+
+    # Do SVD of the x set:
+    U, s, V = np.linalg.svd(x, full_matrices=False)
+
+    # Find U1 and S1:
+    U1 = U[:, :len(s)]
+    S1 = np.diag(s)
+
+    # Compute the weights:
+    w = np.dot(np.dot(V.T, np.linalg.inv(S1)), np.dot(U1.T, y))
+
+    # Compute the predictions with the validation or test set:
+    y_hats = np.dot(x_test, w)
+
+    # Compute the RMSE loss so you can compare with kNN:
+    rmse_loss = np.sqrt(np.mean((y_test - y_hats)**2))
+
+    return y_hats, rmse_loss
+
 
 ###############################################################################
 #############################   MAIN  #########################################
@@ -265,23 +292,49 @@ if __name__ == '__main__':
 
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
     # print("Dataset being tested: iris\n\n")
-    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
-    print("Dataset being tested: mnist_small\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
+    # print("Dataset being tested: mnist_small\n\n")
     
-    # Transforming 1-hot encoded into regular list
-    # for example: [[0],[2]] means the first element is true, then the second element is true...
-    y_train = np.argmax(y_train, axis=1)
-    y_train = y_train.reshape(-1, 1)
-    y_valid = np.argmax(y_val, axis=1)
-    y_valid = y_valid.reshape(-1, 1)
-    y_test = np.argmax(y_test, axis=1)
-    y_test = y_test.reshape(-1, 1)
+    # # Transforming 1-hot encoded into regular list
+    # # for example: [[0],[2]] means the first element is true, then the second element is true...
+    # y_train = np.argmax(y_train, axis=1)
+    # y_train = y_train.reshape(-1, 1)
+    # y_valid = np.argmax(y_val, axis=1)
+    # y_valid = y_valid.reshape(-1, 1)
+    # y_test = np.argmax(y_test, axis=1)
+    # y_test = y_test.reshape(-1, 1)
 
-    best_accuracy, best_k, best_metric = q3_estimator(x_train, y_train, x_val, y_valid)
-    print("Best accuracy found: ", best_accuracy)
-    print("Best k found: ", best_k)
-    print("Best metric found: ", best_metric)
+    # best_accuracy, best_k, best_metric = q3_estimator(x_train, y_train, x_val, y_valid)
+    # print("Best accuracy found: ", best_accuracy)
+    # print("Best k found: ", best_k)
+    # print("Best metric found: ", best_metric)
 
     #===========================    Q4   ===================================#
 
+    # # Load the data:
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mauna_loa')
+    # print("Dataset being tested: mauna_loa\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=2)
+    # print("Dataset being tested: rosenbrock\n\n")
+    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('pumadyn32nm')
+    print("Dataset being tested: pumadyn32nm\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
+    # print("Dataset being tested: iris\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
+    # print("Dataset being tested: mnist_small\n\n")
 
+    # Concatenate the training and validation sets
+    x = np.vstack([x_train, x_val])
+    y = np.vstack([y_train, y_val])
+
+    y_hats, rmse_loss = lin_regression(x, y, x_test, y_test)
+    # print("y_hats: ", y_hats)
+    print("rmse_loss: ", rmse_loss)
+
+    # plt.plot(x_train, y_train, 'mo', markersize=2, label='training set')
+    # plt.plot(x_test, y_hats, 'co', markersize=2, label='prediction set')
+    # plt.xlabel('x values')
+    # plt.ylabel('y values')
+    # plt.title('Prediction curves: mauna_loa dataset')
+    # plt.legend()
+    # plt.show()
