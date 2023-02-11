@@ -69,10 +69,18 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
             y_all_preds = np.concatenate(y_all_preds + y_hats) # for plotting cross-validation prediction curves
             rmse_for_one_k.append(rmse(y_val, y_hats))
 
+        # plot the prediction curves for each value of k:
+        plt.plot(x_val, y_hats, 'o', label='k = ' + str(k))
+        plt.xlabel('x values')
+        plt.ylabel('Predicted y values')
+        plt.title('Cross-validation prediction curves: moana_loa dataset')
+        plt.legend()
+
+
         rmse_for_one_k = np.array(rmse_for_one_k)
                 # print(rmse_for_one_k, k)
         rmses.append(np.mean(rmse_for_one_k))   # Average the RMSE losses over each folds for one k
-
+    plt.show()
     rmses = np.array(rmses)
     # print("RMSE loss averages for each k: ", rmses)
 
@@ -81,19 +89,19 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
     print("Lowest rmse error: ", rmses[min_rmse_index])
     best_k = possible_k_indices[min_rmse_index] # k value that corresponds to the minimum RMSE loss
 
-    # For plotting RMSE loss vs. k value in mauna_loa:
-    plt.plot(possible_k_indices, rmses, 'o-')    
-    plt.xlabel('k values')
-    plt.ylabel('RMSE loss')
-    plt.title('RMSE loss for each k value: moana_loa dataset')
-    plt.show()
+    # # For plotting RMSE loss vs. k value in mauna_loa:
+    # plt.plot(possible_k_indices, rmses, 'o-')    
+    # plt.xlabel('k values')
+    # plt.ylabel('RMSE loss')
+    # plt.title('RMSE loss for each k value: moana_loa dataset')
+    # plt.show()
 
-    # For plotting cross-validation prediction curves in mauna_loa:
-    plt.plot(x, y_all_preds, 'o', label='true values')
-    plt.xlabel('x values')
-    plt.ylabel('Predicted y values')
-    plt.title('Cross-validation prediction curves: moana_loa dataset')
-    plt.show()
+    # # For plotting cross-validation prediction curves in mauna_loa:
+    # plt.plot(x, y_all_preds, 'o', label='true values')
+    # plt.xlabel('x values')
+    # plt.ylabel('Predicted y values')
+    # plt.title('Cross-validation prediction curves: moana_loa dataset')
+    # plt.show()
 
     # For plotting the prediction on the test set in mauna_loa:
 
@@ -104,14 +112,14 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
 #############################   QUESTION 2  ###################################
 ###############################################################################
 
-def knn_regression_kd(x_train, y_train, x_test, k, distance_metric):
+def euclidean_distance(x_train, x_test):
+    '''Find the Euclidian distance between the test point and each training point.'''
+    return np.sqrt(np.sum(np.square(x_train - x_test), axis=1)) # axis=1 means summing over rows
+
+def knn_regression_kd(x_train, y_train, x_test, k, distance_metric=euclidean_distance):
     '''kNN algorithm for regression with 2 distance metrics l1 and l2.
     k is estimated by 5-fold cross-validation. The distance metric is using 
     RMSE loss, and nearest neighbours are found using a kd tree.'''
-    if distance_metric == 'l2': # Euclidian distance
-        dist = np.sqrt(np.sum(np.square(x_train - x_test), axis=1)) # axis=1 means summing over rows TODO problem here!!
-    # elif distance_metric == 'l1':   # Manhattan distance
-    #     dist = np.sum(np.abs(x_train - x_test), axis=1) # axis=1 means summing over rows
 
     # Use a kd tree to find nearest neighbours:
     tree = KDTree(x_train, metric='euclidean')
@@ -155,7 +163,7 @@ if __name__ == '__main__':
 
     #===========================    Q1   ===================================#
 
-    # Load the data:
+    # # Load the data:
     x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mauna_loa')
     print("Dataset being tested: mauna_loa\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=2)
@@ -199,11 +207,11 @@ if __name__ == '__main__':
     # dimensions = []
     # times = [] # time taken to run knn_regression_kd for each dimension
 
-    # for d in range(2, 11):
+    # for d in range(2, 101, 2): # test for dimensions 2, 4, ..., 100
     #     print("Testing dimension: ", d)
     #     x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=d)
     #     time1 = time.time()
-    #     knn_regression_kd(x_train, y_train, x_test, 5, 'l2')
+    #     knn_regression_kd(x_train, y_train, x_test, 5, euclidean_distance)
     #     time2 = time.time()
     #     dimensions.append(d)
     #     times.append(time2 - time1)
