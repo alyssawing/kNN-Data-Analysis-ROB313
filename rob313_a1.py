@@ -242,11 +242,14 @@ if __name__ == '__main__':
     # x = np.vstack([x_train, x_val])
     # y = np.vstack([y_train, y_val])
     # y_hats = []
+
+    # # Run cross validation to determine the optimal k and distance metric: 
+    # # NOTE: the k-values that are iterated over can be adjusted in cross_validation function
     # # print("\nBest k found from cross validation (l1): ", cross_validation(x, y, 'l1'))
     # # print("\nBest k found from cross validation (l2): ", cross_validation(x, y, 'l2'))
 
-    # best_k = 25 # found from cross validation
-    # best_metric = 'l1' # found from cross validation
+    # best_k = 25 # found from cross validation - INPUT
+    # best_metric = 'l1' # found from cross validation - INPUT
     # for x_test_pt in x_test:
     #     y_hat = knn_regression(x_train, y_train, x_test_pt, best_k, best_metric)
     #     y_hats.append(y_hat)
@@ -343,7 +346,7 @@ if __name__ == '__main__':
     x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
     print("Dataset being tested: mnist_small\n\n")
 
-    # # for classification, transform from one-hot encoded to regular list
+    # # FOR CLASSIFICATION, transform from one-hot encoded to regular list
     y_train = np.argmax(y_train, axis=1)
     y_train = y_train.reshape(-1, 1)
     y_val = np.argmax(y_val, axis=1)
@@ -357,9 +360,9 @@ if __name__ == '__main__':
     y = np.vstack([y_train, y_val])
 
     y_hats, measurement = lin_regression(x, y, x_test, y_test, 'classification')
-    # print("y_hats: ", y_hats)
     print("measurement: ", measurement)
 
+# For the mauna_loa dataset:
     # plt.plot(x_train, y_train, 'mo', markersize=2, label='training set')
     # plt.plot(x_test, y_hats, 'co', markersize=2, label='prediction set')
     # plt.xlabel('x values')
