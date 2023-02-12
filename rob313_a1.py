@@ -28,7 +28,8 @@ def knn_regression(x_train, y_train, x_test, k, distance_metric='l2'):
     return [y_hat]    # return y-prediction for the x_test point
 
 def rmse(y, y_hat):   
-    '''Find the root mean squared error (the mean of the errors of each point).'''
+    '''Find the root mean squared error (the mean of the errors of each point
+    in the lists).'''
     return np.sqrt(np.mean(np.square(y - y_hat)))
 
 def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
@@ -47,7 +48,7 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
     y_all_preds = np.array([]) # initialize array of all y values for plotting cross-validation prediction curves 
 
     # For each fold, use the remaining v-1 folds to train the model and evaluate
-    possible_k_indices = np.arange(1,50,2) # indices of the test k's
+    possible_k_indices = np.arange(1,11,1) # indices of the test k's
     for k in possible_k_indices:  # try k from 1 to 50 in steps of 5
         print("testing k = ", k)
         rmse_for_one_k = [] # list of RMSE losses for each fold (to average over at the end)
@@ -70,17 +71,17 @@ def cross_validation(x, y, distance_metric, model=knn_regression, v=5):
             rmse_for_one_k.append(rmse(y_val, y_hats))
 
         # PLOT THE PREDICTION CURVES FOR EACH VALUE OF K (Q1 PART 1):
-        # plt.plot(x_val, y_hats, 'o', markersize=3, label='k = ' + str(k))
-        # plt.xlabel('x values')
-        # plt.ylabel('Predicted y values')
-        # plt.title('Cross-validation prediction curves: moana_loa dataset')
-        # plt.legend()
+        plt.plot(x_val, y_hats, 'o', markersize=3, label='k = ' + str(k))
+        plt.xlabel('x values')
+        plt.ylabel('Predicted y values')
+        plt.title('Cross-validation prediction curves: mauna_loa dataset')
+        plt.legend()
 
 
         rmse_for_one_k = np.array(rmse_for_one_k)
                 # print(rmse_for_one_k, k)
         rmses.append(np.mean(rmse_for_one_k))   # Average the RMSE losses over each folds for one k
-    # plt.show()
+    plt.show()
     rmses = np.array(rmses)
     # print("RMSE loss averages for each k: ", rmses)
 
@@ -164,7 +165,7 @@ def q3_estimator(x_train, y_train, x_val, y_val):
     validation split. Return the best k and the best distance metric.'''
     best_k, best_metric = None, None # initialize
     best_accuracy = 0 # initialize
-    possible_k_indices = np.arange(1,6,1) # possible k values
+    possible_k_indices = np.arange(1,61,5) # possible k values
     possible_metrics = ['l1', 'l2'] # possible distance metrics
 
     for k in possible_k_indices:
@@ -173,7 +174,7 @@ def q3_estimator(x_train, y_train, x_val, y_val):
             y_hats = knn_classification(x_train, y_train, x_val, k, metric)
             accuracy = find_accuracy(y_val, y_hats)
             # print("accuracy: ", accuracy, ",   k: ", k, ",   metric: ", metric, "\n")
-            if accuracy >= best_accuracy:
+            if accuracy > best_accuracy:    # can change to <= to get max value of k (if accuracies are the same)
                 best_accuracy = accuracy
                 # print("Updated accuracy: ", best_accuracy, ",   k: ", k, ",   metric: ", metric, "\n")
                 best_k = k
@@ -229,13 +230,18 @@ if __name__ == '__main__':
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('pumadyn32nm')
     # print("Dataset being tested: pumadyn32nm\n\n")
 
-
     # x = np.vstack([x_train, x_val])
     # y = np.vstack([y_train, y_val])
-    # # print("\nBest k found from cross validation (l1): ", cross_validation(x, y, 'l1'))
+    # print("\nBest k found from cross validation (l1): ", cross_validation(x, y, 'l1'))
     # print("\nBest k found from cross validation (l2): ", cross_validation(x, y, 'l2'))
 
-    # PLOTTING THE PREDICTION ON THE TEST SET IN MAUNA_LOA (Q1 PART 2): TODO
+    # best_k = 25 # found from cross validation
+    # best_metric = 'l1' # found from cross validation
+    # for x_test_pt in x_test:
+    #     y_hat = knn_regression(x_train, y_train, x_test_pt, best_k, best_metric)
+    # print("rmse: ", rmse(y_test, y_hat))
+
+    # PLOTTING THE PREDICTION ON THE TEST SET IN MAUNA_LOA (Q1 PART 2):
     # y_hats = []
     # for x_test_pt in x_test:
     #     y_hat = knn_regression(x_train, y_train, x_test_pt, 2,'l2')
@@ -292,22 +298,25 @@ if __name__ == '__main__':
 
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
     # print("Dataset being tested: iris\n\n")
-    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
-    # print("Dataset being tested: mnist_small\n\n")
+    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
+    print("Dataset being tested: mnist_small\n\n")
     
-    # # Transforming 1-hot encoded into regular list
-    # # for example: [[0],[2]] means the first element is true, then the second element is true...
-    # y_train = np.argmax(y_train, axis=1)
-    # y_train = y_train.reshape(-1, 1)
-    # y_valid = np.argmax(y_val, axis=1)
-    # y_valid = y_valid.reshape(-1, 1)
-    # y_test = np.argmax(y_test, axis=1)
-    # y_test = y_test.reshape(-1, 1)
+    # Transforming 1-hot encoded into regular list
+    # for example: [[0],[2]] means the first element is true, then the second element is true...
+    y_train = np.argmax(y_train, axis=1)
+    y_train = y_train.reshape(-1, 1)
+    y_valid = np.argmax(y_val, axis=1)
+    y_valid = y_valid.reshape(-1, 1)
+    y_test = np.argmax(y_test, axis=1)
+    y_test = y_test.reshape(-1, 1)
 
-    # best_accuracy, best_k, best_metric = q3_estimator(x_train, y_train, x_val, y_valid)
-    # print("Best accuracy found: ", best_accuracy)
-    # print("Best k found: ", best_k)
-    # print("Best metric found: ", best_metric)
+    best_accuracy, best_k, best_metric = q3_estimator(x_train, y_train, x_val, y_valid)
+    print("Best accuracy found: ", best_accuracy)
+    print("Best k found: ", best_k)
+    print("Best metric found: ", best_metric)
+
+    y_hats = knn_classification(x_train, y_train, x_test, best_k, best_metric)
+    print("Test accuracy: ", find_accuracy(y_test, y_hats))
 
     #===========================    Q4   ===================================#
 
@@ -316,20 +325,20 @@ if __name__ == '__main__':
     # print("Dataset being tested: mauna_loa\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('rosenbrock', n_train=5000, d=2)
     # print("Dataset being tested: rosenbrock\n\n")
-    x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('pumadyn32nm')
-    print("Dataset being tested: pumadyn32nm\n\n")
+    # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('pumadyn32nm')
+    # print("Dataset being tested: pumadyn32nm\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('iris')
     # print("Dataset being tested: iris\n\n")
     # x_train, x_val, x_test, y_train, y_val, y_test = load_dataset('mnist_small')
     # print("Dataset being tested: mnist_small\n\n")
 
     # Concatenate the training and validation sets
-    x = np.vstack([x_train, x_val])
-    y = np.vstack([y_train, y_val])
+    # x = np.vstack([x_train, x_val])
+    # y = np.vstack([y_train, y_val])
 
-    y_hats, rmse_loss = lin_regression(x, y, x_test, y_test)
-    # print("y_hats: ", y_hats)
-    print("rmse_loss: ", rmse_loss)
+    # y_hats, rmse_loss = lin_regression(x, y, x_test, y_test)
+    # # print("y_hats: ", y_hats)
+    # print("rmse_loss: ", rmse_loss)
 
     # plt.plot(x_train, y_train, 'mo', markersize=2, label='training set')
     # plt.plot(x_test, y_hats, 'co', markersize=2, label='prediction set')
